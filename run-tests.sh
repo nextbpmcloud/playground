@@ -1,4 +1,9 @@
 #!/bin/bash
+RUNNER=pipenv
+if [ -n "$1" ]
+then
+    RUNNER=$1
+fi
 
 DIR=test-results
 mkdir -p $DIR
@@ -13,21 +18,21 @@ function msgsuccess(){
 
 # run first syntax and code style checks
 msgrun flake8
-pipenv run flake8 --output-file $DIR/flake8.txt src
+$RUNNER run flake8 --output-file $DIR/flake8.txt src
 msgsuccess $? flake8
-pipenv run flake8_junit $DIR/flake8.txt $DIR/flake8_junit.xml >/dev/null
+$RUNNER run flake8_junit $DIR/flake8.txt $DIR/flake8_junit.xml >/dev/null
 
 if [ "$RES" = "ok" ]; then
   # run type checks
   msgrun mypy
-  pipenv run mypy --junit-xml $DIR/mypy_junit.xml src
+  $RUNNER run mypy --junit-xml $DIR/mypy_junit.xml src
   msgsuccess $? mypy
 fi
 
 if [ "$RES" = "ok" ]; then
   # run unit tests with coverage checking
   msgrun pytest
-  pipenv run pytest --cov src --junitxml=$DIR/pytest_junit.xml
+  $RUNNER run pytest --cov src --junitxml=$DIR/pytest_junit.xml
   msgsuccess $? pytest
 fi
 
