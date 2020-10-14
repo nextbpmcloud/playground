@@ -12,6 +12,7 @@ pytest-cov = "*"
 mypy = "*"
 requests = "*"
 uvicorn = "*"
+flake8-junit-report = "*"
 
 [requires]
 python_version = "3.7"
