@@ -1,13 +1,37 @@
 #!/bin/bash
-set -e
+
+DIR=test-results
+mkdir -p $DIR
+
+function msgrun() {
+    echo "Running $1"
+}
+function msgsuccess(){
+    if [ $? -ne 0 ]; then RES=fail; else RES=ok; fi
+    echo "$2: $RES"
+}
 
 # run first syntax and code style checks
-pipenv run flake8 src && echo "Flake8: ok."
+msgrun flake8
+pipenv run flake8 --output-file $DIR/flake8.txt src
+msgsuccess $? flake8
+pipenv run flake8_junit $DIR/flake8.txt $DIR/flake8_junit.xml >/dev/null
 
-# run type checks
-printf "Mypy: " &&  pipenv run mypy src
+if [ "$RES" = "ok" ]; then
+  # run type checks
+  msgrun mypy
+  pipenv run mypy --junit-xml $DIR/mypy_junit.xml src
+  msgsuccess $? mypy
+fi
 
-# run unit tests with coverage checking
-pipenv run pytest --cov src
+if [ "$RES" = "ok" ]; then
+  # run unit tests with coverage checking
+  msgrun pytest
+  pipenv run pytest --cov src --junitxml=$DIR/pytest_junit.xml
+  msgsuccess $? pytest
+fi
 
 echo "Tests done."
+if [ "$RES" != "ok" ]; then
+    exit 1
+fi
