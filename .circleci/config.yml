@@ -26,7 +26,7 @@ jobs:
             - "/usr/local/lib/python3.7/site-packages"
       - run:
           command: |
-            ~/project/run-tests.sh
+            ~/project/run-tests.sh &> test-results
       - store_test_results:
           path: test-results
       - store_artifacts:
