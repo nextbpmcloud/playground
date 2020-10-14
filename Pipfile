@@ -11,6 +11,7 @@ flake8 = "*"
 pytest-cov = "*"
 mypy = "*"
 requests = "*"
+uvicorn = "*"
 
 [requires]
 python_version = "3.7"

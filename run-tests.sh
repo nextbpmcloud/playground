@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # run first syntax and code style checks
 pipenv run flake8 src
