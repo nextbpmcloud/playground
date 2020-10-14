@@ -1,0 +1,34 @@
+# this uses docker python images (based on Debian)
+version: 2
+jobs:
+  build:
+    # working_directory: ~/playground
+    docker:
+      - image: circleci/python:3.7.9
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+    steps:
+      - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
+      - restore_cache:
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: | 
+            sudo pip install pipenv
+            cd ~/project/src/app && pipenv install
+      - save_cache:
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.7/site-packages"
+      - run:
+          command: |
+            ~/project/run-tests.sh
+      - store_test_results:
+          path: test-results
+      - store_artifacts: 
+          path: test-results
+          destination: tr1
