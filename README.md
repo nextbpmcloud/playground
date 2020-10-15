@@ -6,3 +6,5 @@ Currenly, the main focus is about using Python backend(s) and Vue frontend(s):
 * Asynchronous programming: asyncio, task queues, celery, ...
 * Testing
 * Packaging
+
+Texto de prueba.
