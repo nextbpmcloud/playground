@@ -11,8 +11,10 @@ flake8 = "*"
 pytest-cov = "*"
 mypy = "*"
 requests = "*"
-uvicorn = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 flake8-junit-report = "*"
+python-socketio = "*"
+aiofiles = "*"
 
 [requires]
 python_version = "3.7"
