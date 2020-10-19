@@ -1,6 +1,8 @@
 # playground
 
 [![CircleCI](https://circleci.com/gh/nextbpmcloud/playground.svg?style=shield)](https://circleci.com/gh/nextbpmcloud/playground)
+[![codecov](https://codecov.io/gh/nextbpmcloud/playground/branch/main/graph/badge.svg?token=AH2SQ99B43)](https://codecov.io/gh/nextbpmcloud/playground)
+
 
 A repository for finding / trying out concepts / solutions.
 

@@ -40,3 +40,4 @@ echo "Tests done."
 if [ "$RES" != "ok" ]; then
     exit 1
 fi
+bash <(curl -s https://codecov.io/bash)
