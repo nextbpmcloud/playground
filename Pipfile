@@ -13,6 +13,7 @@ mypy = "*"
 requests = "*"
 uvicorn = "*"
 flake8-junit-report = "*"
+jupyterlab = "*"
 
 [requires]
 python_version = "3.7"
