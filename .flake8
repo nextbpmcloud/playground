@@ -1,0 +1,9 @@
+[flake8]
+max-line-length = 119
+max-complexity = 10
+ignore =
+
+# darglint
+# Allow one line docstrings without arg spec
+strictness=short
+docstring_style=google
