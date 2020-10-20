@@ -3,43 +3,67 @@ import pytest
 import socketio
 import uvicorn
 
-from ..main import app
+from .. import main
 
 PORT = 5000
 
-server = None
-server_task = None
-
 
 def get_server():
-    config = uvicorn.Config(app, host='localhost', port=PORT)
+    """Get a complete server instance"""
+    config = uvicorn.Config(main.app, host='127.0.0.1', port=PORT)
     server = uvicorn.Server(config=config)
+    # deactivate monitoring task to avoid errores during shutdown
+    main.sio.eio.start_service_task = False
     config.setup_event_loop()
     return server
 
 
+async def wait_ready(server, interval=0.05, max_wait=5):
+    """Wait for the server to be ready"""
+    i = 0
+    while not server.started:
+        await asyncio.sleep(interval)
+        i += interval
+        if i > max_wait:
+            raise RuntimeError(f"Server couldn't startup in {max_wait} seconds")
+
+
 @pytest.fixture
 async def async_get_server():
-    global server
-    global server_task
-    print("Starting server")
+    """Start server as test fixture and tear down after test"""
     server = get_server()
-    server_task = server.serve()
-    asyncio.ensure_future(server_task)
-    asyncio.sleep(1)
+    serve_task = asyncio.create_task(server.serve())
+    await wait_ready(server)
+    yield
+    # teardown code
+    server.should_exit = True
+    await serve_task   # allow server run tasks before shut down
 
 
 @pytest.mark.asyncio
-async def test_websocket(async_get_server):
+async def test_chat_simple(async_get_server):
+    """A simple websocket test"""
+
+    class Result:
+        """Generic message result"""
+        # add any attributes you need
+        message_received = False
+        message = None
+
     sio = socketio.AsyncClient()
+    result = Result()
 
     @sio.on('chat message')
-    def message(data):
+    def on_message_received(data):
         print(f"Client received: {data}")
+        result.message_received = True
+        result.message = data
 
+    message = 'Hello!'
     await sio.connect(f'http://localhost:{PORT}', socketio_path='/sio/socket.io/')
-    await sio.emit('chat message', 'HOLA!')
+    print(f"Client sends: {message}")
+    await sio.emit('chat message', message)
+    await sio.sleep(0.1)
     await sio.disconnect()
-    server.should_exit = True
-    await server_task.close()
-    asyncio.get_running_loop().stop()
+    assert result.message_received is True
+    assert result.message == message
