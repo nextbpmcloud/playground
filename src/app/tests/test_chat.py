@@ -25,7 +25,7 @@ async def wait_ready(server, interval=0.05, max_wait=5):
         await asyncio.sleep(interval)
         i += interval
         if i > max_wait:
-            raise RuntimeError(f"Server couldn't startup in {max_wait} seconds")
+            raise RuntimeError(f"Server couldn't startup in {max_wait} seconds")  # pragma: no cover
 
 
 @pytest.fixture
