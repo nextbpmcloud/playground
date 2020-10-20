@@ -1,11 +1,21 @@
+# stdlib imports
 import asyncio
+import os
+
+# 3rd party imports
 import pytest
 import socketio
 import uvicorn
 
+# fastapi imports
+from fastapi.testclient import TestClient
+
+# project imports
 from .. import main
 
 PORT = 5000
+
+client = TestClient(main.app)
 
 
 def get_server():
@@ -67,3 +77,13 @@ async def test_chat_simple(async_get_server):
     await sio.disconnect()
     assert result.message_received is True
     assert result.message == message
+
+
+def test_chat_page():
+    """Check if chat page returns contents"""
+    response = client.get("/chat")
+    assert response.status_code == 200
+    fn = os.path.join(os.path.dirname(__file__), '..', 'chat.html')
+    print(f"Chat page: {fn}")
+    with open(fn, 'rb') as page:
+        assert response.content == page.read()
