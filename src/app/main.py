@@ -11,7 +11,8 @@ path = os.path.dirname(__file__)
 app.mount("/static", StaticFiles(directory=os.path.join(path, "static")), name="static")
 
 sio = socketio.AsyncServer(async_mode='asgi')
-app.mount('/sio', socketio.ASGIApp(sio))  # socketio adds automatically /socket.io/ to the URL.
+# socketio adds automatically /socket.io/ to the URL.
+app.mount('/sio', socketio.ASGIApp(sio))
 
 
 @sio.on('connect')
