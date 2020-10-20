@@ -18,7 +18,7 @@ function msgsuccess(){
 
 # run first syntax and code style checks
 msgrun flake8
-$RUNNER run flake8 --output-file $DIR/flake8.txt src
+$RUNNER run flake8 src 2>&1 | tee $DIR/flake8.txt
 msgsuccess $? flake8
 $RUNNER run flake8_junit $DIR/flake8.txt $DIR/flake8_junit.xml >/dev/null
 
