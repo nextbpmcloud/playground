@@ -45,4 +45,4 @@ async def home() -> dict:
 
 @app.get("/chat", response_class=FileResponse)
 def chat() -> FileResponse:
-    return FileResponse('chat.html')
+    return FileResponse(os.path.join(os.path.dirname(__file__), 'chat.html'))
