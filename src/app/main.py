@@ -17,20 +17,20 @@ app.mount('/sio', socketio.ASGIApp(sio))
 
 @sio.on('connect')
 def sio_connect(sid, environ):
-    """A user / browser tab has connected"""
+    """Track user connection"""
     print('A user connected')
 
 
 @sio.on('disconnect')
 def sio_disconnect(sid):
-    """A user / browser tab has disconnected"""
+    """Track user disconnection"""
     print('User disconnected')
 
 
 @sio.on('chat message')
 async def chat_message(sid, msg):
-    """A chat message has arrived"""
-    print('Message: %s' % msg)
+    """Receive a chat message and send to all clients"""
+    print(f"Server received and sends to all clients: {msg}")
     await sio.emit('chat message', msg)
 
 
