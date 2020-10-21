@@ -96,7 +96,7 @@ async def test_chat_simple(startup_and_shutdown_server):
 def test_chat_page():
     """Check if chat page returns contents"""
     response = client.get("/chat")
-    assert response.status_code == 200
+    assert response.ok
     fn = os.path.join(os.path.dirname(__file__), '..', 'chat.html')
     print(f"Chat page: {fn}")
     with open(fn, 'rb') as page:
