@@ -1,3 +1,4 @@
+from typing import List, Optional
 # stdlib imports
 import asyncio
 import os
@@ -7,76 +8,89 @@ import pytest
 import socketio
 import uvicorn
 
-# fastapi imports
+# FastAPI imports
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # project imports
 from .. import main
 
-PORT = 5000
+PORT = 8000
 
+# deactivate monitoring task in python-socketio to avoid errores during shutdown
+main.sio.eio.start_service_task = False
 client = TestClient(main.app)
 
 
-def get_server():
-    """Get a complete server instance"""
-    config = uvicorn.Config(main.app, host='127.0.0.1', port=PORT)
-    server = uvicorn.Server(config=config)
-    # deactivate monitoring task to avoid errores during shutdown
-    main.sio.eio.start_service_task = False
-    config.setup_event_loop()
-    return server
+class UvicornTestServer(uvicorn.Server):
+    """Uvicorn test server
 
+    Usage:
+        @pytest.fixture
+        server = UvicornTestServer()
+        await server.up()
+        yield
+        await server.down()
+    """
 
-async def wait_ready(server, interval=0.05, max_wait=5):
-    """Wait for the server to be ready"""
-    i = 0
-    while not server.started:
-        await asyncio.sleep(interval)
-        i += interval
-        if i > max_wait:
-            raise RuntimeError(f"Server couldn't startup in {max_wait} seconds")  # pragma: no cover
+    def __init__(self, app: FastAPI = main.app, host: str = '127.0.0.1', port: int = PORT):
+        """Create a Uvicorn test server
+
+        Args:
+            app (FastAPI, optional): the FastAPI app. Defaults to main.app.
+            host (str, optional): the host ip. Defaults to '127.0.0.1'.
+            port (int, optional): the port. Defaults to PORT.
+        """
+        self._startup_done = asyncio.Event()
+        super().__init__(config=uvicorn.Config(app, host=host, port=port))
+
+    async def startup(self, sockets: Optional[List] = None) -> None:
+        """Override uvicorn startup"""
+        await super().startup(sockets=sockets)
+        self.config.setup_event_loop()
+        self._startup_done.set()
+
+    async def up(self) -> None:
+        """Start up server asynchronously"""
+        self._serve_task = asyncio.create_task(self.serve())
+        await self._startup_done.wait()
+
+    async def down(self) -> None:
+        """Shut down server asynchronously"""
+        self.should_exit = True
+        await self._serve_task
 
 
 @pytest.fixture
-async def async_get_server():
+async def startup_and_shutdown_server():
     """Start server as test fixture and tear down after test"""
-    server = get_server()
-    serve_task = asyncio.create_task(server.serve())
-    await wait_ready(server)
+    server = UvicornTestServer()
+    await server.up()
     yield
-    # teardown code
-    server.should_exit = True
-    await serve_task   # allow server run tasks before shut down
+    await server.down()
 
 
 @pytest.mark.asyncio
-async def test_chat_simple(async_get_server):
+async def test_chat_simple(startup_and_shutdown_server):
     """A simple websocket test"""
 
-    class Result:
-        """Generic message result"""
-        # add any attributes you need
-        message_received = False
-        message = None
-
     sio = socketio.AsyncClient()
-    result = Result()
+    future = asyncio.get_running_loop().create_future()
 
     @sio.on('chat message')
     def on_message_received(data):
         print(f"Client received: {data}")
-        result.message_received = True
-        result.message = data
+        # set the result
+        future.set_result(message)
 
     message = 'Hello!'
     await sio.connect(f'http://localhost:{PORT}', socketio_path='/sio/socket.io/')
     print(f"Client sends: {message}")
     await sio.emit('chat message', message)
-    await sio.sleep(0.1)
+    # wait for the result to be set (avoid waiting forever)
+    await asyncio.wait_for(future, timeout=1.0)
     await sio.disconnect()
-    assert result.message_received is True
-    assert result.message == message
+    assert future.result() == message
 
 
 def test_chat_page():
