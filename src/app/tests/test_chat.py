@@ -17,6 +17,8 @@ from fastapi.testclient import TestClient
 from .. import main
 
 PORT = 8000
+LISTENING_IF = '127.0.0.1'
+BASE_URL = f'http://{LISTENING_IF}:{PORT}'
 
 # deactivate monitoring task in python-socketio to avoid errores during shutdown
 main.sio.eio.start_service_task = False
@@ -34,7 +36,7 @@ class UvicornTestServer(uvicorn.Server):
         await server.down()
     """
 
-    def __init__(self, app: FastAPI = main.app, host: str = '127.0.0.1', port: int = PORT):
+    def __init__(self, app: FastAPI = main.app, host: str = LISTENING_IF, port: int = PORT):
         """Create a Uvicorn test server
 
         Args:
@@ -87,7 +89,7 @@ async def test_chat_simple(startup_and_shutdown_server):  # pylint: disable=unus
         future.set_result(data)
 
     message = 'Hello!'
-    await sio.connect(f'http://localhost:{PORT}', socketio_path='/sio/socket.io/')
+    await sio.connect(BASE_URL, socketio_path='/sio/socket.io/')
     print(f"Client sends: {message}")
     await sio.emit('chat message', message)
     # wait for the result to be set (avoid waiting forever)
@@ -104,3 +106,15 @@ def test_chat_page():
     print(f"Chat page: {filename}")
     with open(filename, 'rb') as page:
         assert response.content == page.read()
+
+
+@pytest.mark.asyncio
+async def test_chat_page2(startup_and_shutdown_server):
+    """Check if chat page returns contents"""
+    import aiohttp
+    async with aiohttp.ClientSession() as session:
+        async with session.get(BASE_URL + '/chat') as response:
+            assert response.status == 200
+            content = await response.text()
+            assert 'socket.io' in content
+            assert 'chat' in content
