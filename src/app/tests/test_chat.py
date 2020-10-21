@@ -1,5 +1,5 @@
 """Some python-socketio tests"""
-from typing import List, Optional
+from typing import Any, List, Optional, Awaitable
 # stdlib imports
 import asyncio
 import os
@@ -13,7 +13,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-# project imports
+# project importsn
 from .. import main
 
 PORT = 8000
@@ -43,6 +43,7 @@ class UvicornTestServer(uvicorn.Server):
             port (int, optional): the port. Defaults to PORT.
         """
         self._startup_done = asyncio.Event()
+        self._serve_task: Optional[Awaitable[Any]] = None
         super().__init__(config=uvicorn.Config(app, host=host, port=port))
 
     async def startup(self, sockets: Optional[List] = None) -> None:
@@ -51,35 +52,36 @@ class UvicornTestServer(uvicorn.Server):
         self.config.setup_event_loop()
         self._startup_done.set()
 
-    async def up(self) -> None:
+    async def start_up(self) -> None:
         """Start up server asynchronously"""
         self._serve_task = asyncio.create_task(self.serve())
         await self._startup_done.wait()
 
-    async def down(self) -> None:
+    async def tear_down(self) -> None:
         """Shut down server asynchronously"""
         self.should_exit = True
-        await self._serve_task
+        if self._serve_task:
+            await self._serve_task
 
 
 @pytest.fixture
-async def startup_and_shutdown_server():
+async def startup_and_shutdown_server():    # pylint: disable=unused-variable
     """Start server as test fixture and tear down after test"""
     server = UvicornTestServer()
-    await server.up()
+    await server.start_up()
     yield
-    await server.down()
+    await server.tear_down()
 
 
 @pytest.mark.asyncio
-async def test_chat_simple(startup_and_shutdown_server):
+async def test_chat_simple(startup_and_shutdown_server):  # pylint: disable=unused-argument,redefined-outer-name
     """A simple websocket test"""
 
     sio = socketio.AsyncClient()
     future = asyncio.get_running_loop().create_future()
 
     @sio.on('chat message')
-    def on_message_received(data):
+    def on_message_received(data):          # pylint: disable=unused-variable
         print(f"Client received: {data}")
         # set the result
         future.set_result(data)
@@ -98,7 +100,7 @@ def test_chat_page():
     """Check if chat page returns contents"""
     response = client.get("/chat")
     assert response.ok
-    fn = os.path.join(os.path.dirname(__file__), '..', 'chat.html')
-    print(f"Chat page: {fn}")
-    with open(fn, 'rb') as page:
+    filename = os.path.join(os.path.dirname(__file__), '..', 'chat.html')
+    print(f"Chat page: {filename}")
+    with open(filename, 'rb') as page:
         assert response.content == page.read()
