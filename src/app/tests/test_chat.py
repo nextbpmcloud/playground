@@ -1,3 +1,4 @@
+"""Some python-socketio tests"""
 from typing import List, Optional
 # stdlib imports
 import asyncio
@@ -81,7 +82,7 @@ async def test_chat_simple(startup_and_shutdown_server):
     def on_message_received(data):
         print(f"Client received: {data}")
         # set the result
-        future.set_result(message)
+        future.set_result(data)
 
     message = 'Hello!'
     await sio.connect(f'http://localhost:{PORT}', socketio_path='/sio/socket.io/')
