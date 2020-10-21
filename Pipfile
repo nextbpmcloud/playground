@@ -17,6 +17,7 @@ aiofiles = "*"
 ipdb = "*"
 python-socketio = {extras = ["asyncio_client"], version = "*"}
 pytest-asyncio = "*"
+jupyterlab = "*"
 
 [requires]
 python_version = "3.7"
