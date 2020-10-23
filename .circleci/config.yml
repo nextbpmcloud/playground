@@ -10,23 +10,24 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
-      - run: sudo chown -R circleci:circleci /usr/local/bin
-      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
+      - run: sudo chown circleci:circleci /usr/local/bin /usr/local/lib/python3.7/site-packages
       - restore_cache:
-          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps-{{ .Branch }}-{{ checksum "src/Pipfile.lock" }}
       - run:
           command: |
             sudo pip install pipenv
-            cd ~/project/src/app && pipenv install
+            cd ~/project/src
+            export PIPENV_VENV_IN_PROJECT=enabled
+            pipenv install
       - save_cache:
-          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps-{{ .Branch }}-{{ checksum "src/Pipfile.lock" }}
           paths:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.7/site-packages"
       - run:
           command: |
-            ~/project/run-tests.sh
+            cd ~/project/src && ./run-tests.sh
       - store_test_results:
           path: test-results
       - store_artifacts:
