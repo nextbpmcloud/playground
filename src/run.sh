@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd src/app
-uvicorn main:app --reload
+cd app
+pipenv run uvicorn main:app --host 0.0.0.0 --reload
