@@ -1,0 +1,57 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Test API",
+        "version": "0.1"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Home",
+                "description": "Get version info",
+                "operationId": "home__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VersionInfo"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "VersionInfo": {
+                "title": "VersionInfo",
+                "required": [
+                    "name",
+                    "version"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string",
+                        "description": "Application name"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "string",
+                        "description": "Application version"
+                    }
+                },
+                "description": "The version info model",
+                "example": {
+                    "name": "Test API",
+                    "version": "0.1"
+                }
+            }
+        }
+    }
+}
