@@ -63,6 +63,23 @@ async def home():
     return res
 
 
+class EchoRequestResponse(BaseModel):
+    """Echo response model"""
+    message: str
+
+
+@app.get("/echo", response_model=EchoRequestResponse)
+async def echo_get(message: str):
+    """Echo text gotten from query string with get method"""
+    return EchoRequestResponse(message=message)
+
+
+@app.post("/echo", response_model=EchoRequestResponse)
+async def echo_post(message: EchoRequestResponse):
+    """Echo text gotten from body with post method"""
+    return EchoRequestResponse(message=message.message)
+
+
 @app.get("/chat", response_class=FileResponse)
 def chat() -> FileResponse:
     """Load the chat html page"""
