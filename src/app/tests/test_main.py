@@ -22,9 +22,16 @@ def test_home():
 # ===== Tests gotten from json request / response samples stored in files
 
 
-def test_example1():
-    """Test with API examples data"""
-    sample = get_sample("example1")
+def test_home_get():
+    """Test API home with sample request/response"""
+    sample = get_sample("home_get")
+    response = do_request(client, sample)
+    check_response(response, sample)
+
+
+def test_home_get_multi():
+    """Test API home with sample requests (multi) / response"""
+    sample = get_sample("home_get_multi")
     response = do_request(client, sample)
     check_response(response, sample)
 
