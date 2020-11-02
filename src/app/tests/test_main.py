@@ -79,7 +79,7 @@ def get_sample(sample: str) -> dict:
     return AttrDict(json.loads(open(get_sample_filename(sample)).read()))
 
 
-def do_request(sample: dict):
+def do_request(sample: AttrDict):
     """Run request based on sample data"""
     request = sample.request
     method = request.get('method', 'get')
