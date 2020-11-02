@@ -1,0 +1,187 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Test API",
+        "version": "0.1"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Home",
+                "description": "Get version info",
+                "operationId": "home__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VersionInfo"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/echo": {
+            "get": {
+                "summary": "Echo Get",
+                "description": "Echo text gotten from query string with get method",
+                "operationId": "echo_get_echo_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Message",
+                            "type": "string"
+                        },
+                        "name": "message",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EchoRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Echo Post",
+                "description": "Echo text gotten from body with post method",
+                "operationId": "echo_post_echo_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EchoRequestResponse"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EchoRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "EchoRequestResponse": {
+                "title": "EchoRequestResponse",
+                "required": [
+                    "message"
+                ],
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "title": "Message",
+                        "type": "string"
+                    }
+                },
+                "description": "Echo response model"
+            },
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            },
+            "VersionInfo": {
+                "title": "VersionInfo",
+                "required": [
+                    "name",
+                    "version"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string",
+                        "description": "Application name"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "string",
+                        "description": "Application version"
+                    }
+                },
+                "description": "The version info model",
+                "example": {
+                    "name": "Test API",
+                    "version": "0.1"
+                }
+            }
+        }
+    }
+}

@@ -6,7 +6,12 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI()
+from pydantic import BaseModel, Field
+
+NAME = 'Test API'
+VERSION = '0.1'
+
+app = FastAPI(title=NAME, version=VERSION)
 path = os.path.dirname(__file__)
 app.mount("/static", StaticFiles(directory=os.path.join(path, "static")), name="static")
 
@@ -34,14 +39,45 @@ async def chat_message(sid, msg):   # pylint: disable=unused-argument
     await sio.emit('chat message', msg)
 
 
-@app.get("/")
-async def home() -> dict:
-    """Check if system is alive and get version info"""
-    return {
-        'name': "Test Service",
-        'message': "Hello world",
-        'version': "0.1",
-    }
+class VersionInfo(BaseModel):
+    """The version info model"""
+    name: str = Field(..., description="Application name")
+    version: str = Field(..., description="Application version")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": NAME,
+                "version": VERSION,
+            }
+        }
+
+
+@app.get("/", response_model=VersionInfo)
+async def home():
+    """Get version info"""
+    res = VersionInfo(
+        name=NAME,
+        version=VERSION,
+    )
+    return res
+
+
+class EchoRequestResponse(BaseModel):
+    """Echo response model"""
+    message: str
+
+
+@app.get("/echo", response_model=EchoRequestResponse)
+async def echo_get(message: str):
+    """Echo text gotten from query string with get method"""
+    return EchoRequestResponse(message=message)
+
+
+@app.post("/echo", response_model=EchoRequestResponse)
+async def echo_post(message: EchoRequestResponse):
+    """Echo text gotten from body with post method"""
+    return EchoRequestResponse(message=message.message)
 
 
 @app.get("/chat", response_class=FileResponse)
