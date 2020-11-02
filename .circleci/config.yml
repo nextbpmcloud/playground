@@ -10,7 +10,7 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
-      - run: sudo chown circleci:circleci /usr/local/bin /usr/local/lib/python3.7/site-packages
+      - run: sudo chown -R circleci:circleci /usr/local/bin /usr/local/lib/python3.7/site-packages
       - restore_cache:
           key: deps-{{ .Branch }}-{{ checksum "src/Pipfile.lock" }}
       - run:
