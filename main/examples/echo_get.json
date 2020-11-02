@@ -1,0 +1,13 @@
+{
+    "request": {
+      "url": "/echo?message=Hello",
+      "method": "get"
+    },
+    "response": {
+      "content-type": "application/json",
+      "code": 200,
+      "body": {
+        "message": "Hello"
+      }
+    }
+  }
