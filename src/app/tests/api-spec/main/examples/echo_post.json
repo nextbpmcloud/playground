@@ -1,0 +1,16 @@
+{
+    "request": {
+      "url": "/echo",
+      "method": "post",
+      "body": {
+        "message": "hello"
+      }
+    },
+    "response": {
+      "content-type": "application/json",
+      "code": 200,
+      "body": {
+        "message": "hello"
+      }
+    }
+  }
