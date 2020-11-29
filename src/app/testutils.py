@@ -161,4 +161,5 @@ def check_response(response: ResponseWrapper, sample: AttrDict) -> None:
         except KeyError:    # pragma: no cover
             raise ValueError(f"Sample {sample.name}: Unknown operator: {op}")  # pragma: no cover
         assert opmethod(response_value, expected_value), (
-            f"Sample {sample.name}: Failed assertion: {key} {op} {repr(expected_value)} . Found: {repr(response_value)}")
+            f"Sample {sample.name}: Failed assertion: {key} {op} {repr(expected_value)} . "
+            f"Found: {repr(response_value)}")
