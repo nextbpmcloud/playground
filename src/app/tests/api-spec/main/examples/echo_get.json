@@ -7,7 +7,7 @@
       "content-type": "application/json",
       "code": 200,
       "body": {
-        "message": "Hello"
+        "message": "Helloz"
       }
     }
   }

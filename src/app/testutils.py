@@ -150,15 +150,15 @@ def check_response(response: ResponseWrapper, sample: AttrDict) -> None:
         f"Sample {sample.name}: Unexpected response code. Expected {expected_code}, found: {response.status_code}")
     for key, expected_value in expected_response.body.item_list():
         response_value = getattr(response.body, key)
+        op = '=='
         if isinstance(expected_value, AttrDict):
-            op = expected_value.get('op', "==")
-            if isinstance(expected_value.value, list):
-                op = 'in'  # pragma: no cover
-            opmethod = operator_map.get(op)
-            if not opmethod:
-                raise ValueError(f"Sample {sample.name}: Unknown operator: {op}")  # pragma: no cover
+            op = expected_value.get('op', op)
             expected_value = expected_value.value
-            assert opmethod(response_value, expected_value), (
-                f"Sample {sample.name}: Test '{key} {op} {expected_value}' failed. Found: {response_value}")
-        else:
-            assert response_value == expected_value
+        if isinstance(expected_value, list) and op == '==':
+            op = 'in'       # pragma: no cover
+        try:
+            opmethod = operator_map[op]
+        except KeyError:    # pragma: no cover
+            raise ValueError(f"Sample {sample.name}: Unknown operator: {op}")  # pragma: no cover
+        assert opmethod(response_value, expected_value), (
+            f"Sample {sample.name}: Failed assertion: {key} {op} {repr(expected_value)} . Found: {repr(response_value)}")
